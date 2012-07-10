@@ -16,7 +16,7 @@
 
 <li{% if comment.last %} class="last"{% endif %}>
 
-{{ comment.tree_path }}{% if comment.added_path %} ADDED {% endif %}
+{{ comment.tree_path }} {{ comment.s}}{% if comment.added_path %} ADDED {% endif %}
 
 {% for close in comment.close %}
     </li>

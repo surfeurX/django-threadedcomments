@@ -1,8 +1,10 @@
 from django import template
 from django.template.loader import render_to_string
 from django.contrib.comments.templatetags.comments import BaseCommentNode
+from django.contrib.contenttypes.models import ContentType
 from django.contrib import comments
 from threadedcomments.util import annotate_tree_properties, fill_tree
+from django.utils.encoding import smart_unicode
 register = template.Library()
 
 class BaseThreadedCommentNode(BaseCommentNode):
@@ -47,14 +49,30 @@ class CommentListNode(BaseThreadedCommentNode):
         return comment_node_instance
 
     handle_token = classmethod(handle_token)
-
+    
+    def get_query_set(self, context):
+        ctype, object_pk = self.get_target_ctype_pk(context)
+        if not object_pk:
+            return self.comment_model.objects.none()
+        
+        objs = self.comment_model.cache.comments_for_object(
+                query={
+                    "content_type__id":ctype.id,
+                    "object_pk": smart_unicode(object_pk)
+                })
+        
+        return objs
+    
     def get_context_value_from_queryset(self, context, qs):
-        if self.flat:
-            qs = qs.order_by('-submit_date')
-        elif self.root_only:
-            qs = qs.exclude(parent__isnull=False).order_by('-submit_date')
         return qs
-
+    
+    def get_target_ctype_pk(self, context):
+        try:
+            obj = self.object_expr.resolve(context)
+        except template.VariableDoesNotExist:
+            return None, None
+        return ContentType.cache.get_for_model(obj), obj.pk
+        
 
 class CommentFormNode(BaseThreadedCommentNode):
     """
@@ -99,8 +117,7 @@ class CommentFormNode(BaseThreadedCommentNode):
         if self.parent:
             parent_id = self.parent.resolve(context, ignore_failures=True)
         if object_pk:
-            return comments.get_form()(
-                ctype.get_object_for_this_type(pk=object_pk), parent=parent_id)
+            return comments.get_form()(self.object_expr.resolve(context), parent=parent_id)
         else:
             return None
 
@@ -155,7 +172,9 @@ class RenderCommentFormNode(CommentFormNode):
     handle_token = classmethod(handle_token)
 
     def render(self, context):
+        
         ctype, object_pk = self.get_target_ctype_pk(context)
+        #import pdb; pdb.set_trace()
         if object_pk:
             template_search_list = (
                 "comments/%s/%s/form.html" % (ctype.app_label, ctype.model),

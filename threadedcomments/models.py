@@ -3,6 +3,7 @@ from django.contrib.comments.models import Comment
 from django.contrib.comments.managers import CommentManager
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from managers import ThreadedCommentCacheManager
 
 PATH_SEPARATOR = getattr(settings, 'COMMENT_PATH_SEPARATOR', '/')
 PATH_DIGITS = getattr(settings, 'COMMENT_PATH_DIGITS', 10)
@@ -17,7 +18,8 @@ class ThreadedComment(Comment):
         db_index=True)
 
     objects = CommentManager()
-
+    cache = ThreadedCommentCacheManager()
+    
     def _get_depth(self):
         return len(self.tree_path.split(PATH_SEPARATOR))
     depth = property(_get_depth)
