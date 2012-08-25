@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 from django import forms
 from django.contrib.comments.forms import CommentForm
 from django.conf import settings
@@ -34,3 +35,10 @@ class ThreadedCommentForm(CommentForm):
         d['title'] = self.cleaned_data['title']
         return d
 
+    def clean_parent(self):
+        parent = self.cleaned_data["parent"]
+        if parent:
+            parent_comment = ThreadedComment.objects.get(id=parent)
+            if parent_comment.depth >= 2:
+                raise forms.ValidationError(u"vous ne pouvez pas répondre à ce commentaire")
+        return parent
