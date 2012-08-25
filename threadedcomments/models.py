@@ -25,6 +25,8 @@ class ThreadedComment(Comment):
     depth = property(_get_depth)
 
     def _root_id(self):
+        if not self.tree_path:
+            self.save()
         return int(self.tree_path.split(PATH_SEPARATOR)[0])
     root_id = property(_root_id)
 
