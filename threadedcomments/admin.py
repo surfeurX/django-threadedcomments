@@ -21,7 +21,7 @@ class ThreadedCommentsAdmin(CommentsAdmin):
         ),
     )
 
-    list_display = ('name', 'title', 'submit_date', 'is_public', 'is_removed')
+    list_display = ('name', 'comment', 'submit_date', 'is_public', 'is_removed')
     search_fields = ('title', 'comment', 'user__username', 'user_name',
                      'user_email', 'user_url', 'ip_address')
     raw_id_fields = ("parent",)

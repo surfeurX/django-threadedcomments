@@ -60,7 +60,6 @@ class CommentListNode(BaseThreadedCommentNode):
                     "content_type__id":ctype.id,
                     "object_pk": smart_unicode(object_pk)
                 })
-        
         return objs
     
     def get_context_value_from_queryset(self, context, qs):
