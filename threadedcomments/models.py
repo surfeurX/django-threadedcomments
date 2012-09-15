@@ -13,7 +13,7 @@ class ThreadedComment(Comment):
     parent = models.ForeignKey('self', null=True, blank=True, default=None,
         related_name='children', verbose_name=_('Parent'))
     last_child = models.ForeignKey('self', null=True, blank=True,
-        verbose_name=_('Last child'))
+        verbose_name=_('Last child'), on_delete=models.SET_NULL)
     tree_path = models.TextField(_('Tree path'), editable=False,
         db_index=True)
 

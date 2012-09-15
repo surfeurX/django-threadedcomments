@@ -39,6 +39,6 @@ class ThreadedCommentForm(CommentForm):
         parent = self.cleaned_data["parent"]
         if parent:
             parent_comment = ThreadedComment.objects.get(id=parent)
-            if parent_comment.depth >= 2:
+            if parent_comment.depth >= 3:
                 raise forms.ValidationError(u"vous ne pouvez pas répondre à ce commentaire")
         return parent
